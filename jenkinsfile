@@ -2,8 +2,8 @@ pipeline {
   agent any
   
   environment {
-    TERRAFORM_VERSION = '1.1.5'
-    DIGITALOCEAN_TOKEN = credentials('digitalocean_token')
+    TERRAFORM_VERSION = '1.4.0'
+    DIGITALOCEAN_TOKEN = credentials('dop_v1_fb40b2a8ef6d7a71e9db4becab0751880a14eb3a45ae1902fcd88f028ae0ae12')
   }
   
   stages {
