@@ -1,10 +1,42 @@
 pipeline {
-    agent any
-    stages {
-        stage('build') {
-            steps {
-               echo 'HOLA MUNDO'
-            }
-        }
+  agent any
+  
+  environment {
+    TERRAFORM_VERSION = '1.1.5'
+    DIGITALOCEAN_TOKEN = credentials('digitalocean_token')
+  }
+  
+  stages {
+    stage('Inicialización') {
+      steps {
+        sh "wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+        sh "unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /usr/local/bin/"
+        sh "terraform init"
+      }
     }
+  
+    stage('Planificación') {
+      steps {
+        withCredentials([string(credentialsId: 'digitalocean_token', variable: 'DIGITALOCEAN_TOKEN')]) {
+          sh "terraform plan -out=tfplan"
+        }
+      }
+    }
+  
+    stage('Ejecución') {
+      steps {
+        withCredentials([string(credentialsId: 'digitalocean_token', variable: 'DIGITALOCEAN_TOKEN')]) {
+          sh "terraform apply tfplan"
+        }
+      }
+    }
+  
+    stage('Limpieza') {
+      steps {
+        withCredentials([string(credentialsId: 'digitalocean_token', variable: 'DIGITALOCEAN_TOKEN')]) {
+          sh "terraform destroy -auto-approve"
+        }
+      }
+    }
+  }
 }
